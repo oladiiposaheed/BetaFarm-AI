@@ -1,0 +1,30 @@
+# ============================================================
+# config.yaml - Training Configuration (MobileNet Only)
+# ============================================================
+
+# Dataset settings
+dataset_path: "datasets/new_plant_diseases"
+num_classes: 38
+
+# CNN settings
+cnn:
+  img_size: 224
+  batch_size: 32
+  learning_rate: 0.0001 # Lower for pretrained model fine-tuning
+  epochs: 10 # 10 epochs is enough for fine-tuning
+  device: "cpu" # Change to "cuda" if you have GPU
+  num_workers: 0 # Windows fix (0 instead of 4)
+
+# Models to train (Only MobileNet - best for your project)
+models_to_train:
+  custom_cnn: false # ❌ Too slow, 53M parameters
+  mobilenet: true # ✅ Best choice: 0.7M trainable params
+  efficientnet: false # ❌ Download issues
+  resnet: false # ❌ Too heavy for CPU
+
+# Training parameters
+training:
+  save_best_only: true
+  early_stopping_patience: 5 # Stop if no improvement for 5 epochs
+  checkpoint_dir: "saved_models"
+  results_dir: "results/mobilenet"

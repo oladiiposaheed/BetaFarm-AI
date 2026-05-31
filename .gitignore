@@ -1,0 +1,97 @@
+# Environment variables (contains secrets - NEVER commit!)
+
+.env
+rag/.env
+backend_dj/.env
+
+# Virtual environment
+
+betafarm-venv/
+venv/
+env/
+
+# Python cache files
+
+**pycache**/
+_.pyc
+_.pyo
+\*.pyd
+
+# Database files
+
+_.sqlite3
+_.db
+
+# Media and uploads
+
+media/
+uploads/
+
+# Log files
+
+\*.log
+logs/
+
+# Large data folders (NOT for GitHub)
+
+rag/chroma_db/
+rag/logs/
+rag/retrieval/bm25_index.pkl
+chroma_db/
+logs/
+
+# Training datasets (too large for GitHub)
+
+datasets/
+models/_.pth
+models/_.onnx
+models/\*.pt
+
+# IDE files
+
+.vscode/
+.idea/
+_.swp
+_.swo
+
+# OS files
+
+.DS_Store
+Thumbs.db
+
+# Frontend (if you have node modules)
+
+frontend/node_modules/
+frontend/.env
+
+# Backend Django specific
+
+backend_dj/**pycache**/
+backend_dj/\*.pyc
+backend_dj/media/
+backend_dj/staticfiles/
+
+# RAG specific
+
+rag/**pycache**/
+rag/\*.pyc
+rag/data/ # PDFs are on Hugging Face
+
+# FastAPI specific
+
+inference_api/**pycache**/
+inference_api/\*.pyc
+
+# Testing
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Deployment files (optional)
+
+# Dockerfile
+
+# docker-compose.yml
+
+# .dockerignore

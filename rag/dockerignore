@@ -1,0 +1,41 @@
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+
+# Version control
+.git
+.gitignore
+
+# Secrets
+.env
+
+# Large data folders
+chroma_db
+logs
+data
+datasets
+media
+uploads
+
+# Model files
+models/*.pth
+models/*.onnx
+models/*.pt
+
+# Database
+*.sqlite3
+*.db
+
+# Virtual environment
+betafarm-venv
+venv
+env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea

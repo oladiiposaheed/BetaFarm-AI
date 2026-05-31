@@ -1,0 +1,305 @@
+# ============================================================
+# BetaFarm AI - RAG System Configuration
+# Version: 1.0.0
+# ============================================================
+
+# Application settings
+app:
+  name: "BetaFarm AI - RAG System"
+  version: "1.0.0"
+  debug: true
+  host: "0.0.0.0"
+  port: 8002
+
+# Paths
+paths:
+  data_dir: "rag/data"
+  faiss_index_dir: "rag/faiss_index"
+  chromadb_db_dir: "rag/chroma_db"
+  logs_dir: "rag/logs"
+
+# ============================================================
+# DOCUMENT PROCESSING
+# ============================================================
+
+chunking:
+  chunk_size: 512
+  chunk_overlap: 50
+  separators: ["\n\n", "\n", ". ", " ", ""]
+
+# ============================================================
+# EMBEDDINGS (Multiple providers supported)
+# ============================================================
+
+embeddings:
+  # Active embedding provider (change to switch models)
+  active_provider: "bge"        # Options: "bge" or "openai"
+  
+  # Provider 1: BGE (Free, offline, multilingual)
+  bge:
+    model: "BAAI/bge-large-en-v1.5"
+    dimension: 1024
+    batch_size: 32
+    device: "cpu"
+    normalize: true
+    description: "Best for offline use, supports 100+ languages"
+  
+  # Provider 2: OpenAI (Paid, higher quality, better multilingual)
+  openai:
+    model: "text-embedding-3-small"
+    dimension: 1536
+    batch_size: 32
+    api_key_env: "OPENAI_API_KEY"
+    normalize: true
+    description: "Best for accuracy, requires API key"
+
+# ============================================================
+# VECTOR DATABASE (Supports multiple embedding dimensions)
+# ============================================================
+
+vector_db:
+  type: "chromadb"
+  collection_name_prefix: "betafarm_documents"  # Will become "betafarm_documents_bge" or "betafarm_documents_openai"
+  persist_directory: "./chroma_db"
+  
+  # FAISS settings (if you switch type to "faiss")
+  faiss_index_type: "Flat"
+  faiss_metric: "InnerProduct"
+
+# ============================================================
+# RETRIEVAL
+# ============================================================
+
+retrieval:
+  top_k: 10
+  top_k_after_rerank: 5
+  similarity_threshold: 0.7
+  use_hybrid_search: true
+  use_reranking: true
+  use_query_rewriting: true
+
+# ============================================================
+# LLM
+# ============================================================
+
+llm:
+  default_provider: "groq"
+  fallback_provider: "openai"
+  temperature: 0.3
+  max_tokens: 500
+
+groq:
+  model: "llama-3.1-8b-instant"
+  api_key_env: "GROQ_API_KEY"
+  timeout: 30
+  max_retries: 3
+
+openai:
+  model: "gpt-4o-mini"
+  api_key_env: "OPENAI_API_KEY"
+  timeout: 45
+  max_retries: 3
+
+# ============================================================
+# MULTILINGUAL TRANSLATION
+# ============================================================
+
+languages:
+  supported:
+    - {code: "en", name: "English", direction: "ltr", enabled: true}
+    - {code: "yo", name: "Yoruba", direction: "ltr", enabled: true}
+    - {code: "ha", name: "Hausa", direction: "ltr", enabled: true}
+    - {code: "ig", name: "Igbo", direction: "ltr", enabled: true}
+    - {code: "pcm", name: "Pidgin English", direction: "ltr", enabled: true}
+    - {code: "ar", name: "Arabic", direction: "rtl", enabled: true}
+    - {code: "fr", name: "French", direction: "ltr", enabled: true}
+  
+  default: "en"
+  
+  translation:
+    provider: "groq"
+    cache_enabled: true
+    cache_ttl: 86400
+    max_text_length: 2000
+
+# ============================================================
+# LOGGING
+# ============================================================
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
+  file: "logs/rag.log"
+  max_bytes: 10485760
+  backup_count: 5
+
+# ============================================================
+# CACHE
+# ============================================================
+
+cache:
+  enabled: true
+  ttl: 3600
+  max_size: 1000
+
+# ============================================================
+# SERVER
+# ============================================================
+
+server:
+  host: "0.0.0.0"
+  port: 8002
+  debug: true
+  reload: false# ============================================================
+# BetaFarm AI - RAG System Configuration
+# Version: 1.0.0
+# ============================================================
+
+# Application settings
+app:
+  name: "BetaFarm AI - RAG System"
+  version: "1.0.0"
+  debug: true
+  host: "0.0.0.0"
+  port: 8002
+
+# Paths
+paths:
+  data_dir: "rag/data"
+  faiss_index_dir: "rag/faiss_index"
+  chromadb_db_dir: "rag/chroma_db"
+  logs_dir: "rag/logs"
+
+# ============================================================
+# DOCUMENT PROCESSING
+# ============================================================
+
+chunking:
+  chunk_size: 512
+  chunk_overlap: 50
+  separators: ["\n\n", "\n", ". ", " ", ""]
+
+# ============================================================
+# EMBEDDINGS (Multiple providers supported)
+# ============================================================
+
+embeddings:
+  # Active embedding provider (change to switch models)
+  active_provider: "openai"       
+
+  # # Provider 1: BGE (Free, offline, multilingual)
+  # bge:
+  #   model: "BAAI/bge-large-en-v1.5"
+  #   dimension: 1024
+  #   batch_size: 32
+  #   device: "cpu"
+  #   normalize: true
+  #   description: "Best for offline use, supports 100+ languages"
+  
+  # Provider 2: OpenAI (Paid, higher quality, better multilingual)
+  openai:
+    model: "text-embedding-3-small"
+    dimension: 1536
+    batch_size: 32
+    api_key_env: "OPENAI_API_KEY"
+    normalize: true
+    #description: "Best for accuracy, requires API key"
+
+
+# VECTOR DATABASE SETTINGS
+vector_db:
+  database_type: "chromadb"           # Was: type
+  table_prefix: "farm_data"      # Was: collection_name_prefix
+  database_folder: "./chroma_db"      # Was: persist_directory
+  
+  # FAISS settings (if you switch database_type to "faiss")
+  faiss_index_type: "Flat"
+  faiss_metric: "InnerProduct"
+
+# ============================================================
+# RETRIEVAL
+# ============================================================
+
+retrieval:
+  top_k: 10
+  top_k_after_rerank: 5
+  similarity_threshold: 0.7
+  use_hybrid_search: true
+  use_reranking: true
+  use_query_rewriting: true
+
+# ============================================================
+# LLM
+# ============================================================
+
+llm:
+  default_provider: "groq"
+  fallback_provider: "openai"
+  temperature: 0.3
+  max_tokens: 3000
+
+groq:
+  model: "llama-3.1-8b-instant"
+  api_key_env: "GROQ_API_KEY"
+  timeout: 30
+  max_retries: 3
+
+openai:
+  model: "gpt-4o-mini"
+  api_key_env: "OPENAI_API_KEY"
+  timeout: 45
+  max_retries: 3
+
+# ============================================================
+# MULTILINGUAL TRANSLATION
+# ============================================================
+
+languages:
+  supported:
+    - {code: "en", name: "English", direction: "ltr", enabled: true}
+    - {code: "yo", name: "Yoruba", direction: "ltr", enabled: true}
+    - {code: "ha", name: "Hausa", direction: "ltr", enabled: true}
+    - {code: "ig", name: "Igbo", direction: "ltr", enabled: true}
+    - {code: "pcm", name: "Pidgin English", direction: "ltr", enabled: true}
+    - {code: "ar", name: "Arabic", direction: "rtl", enabled: true}
+    - {code: "fr", name: "French", direction: "ltr", enabled: true}
+  
+  default: "en"
+  
+  translation:
+    provider: "groq"
+    cache_enabled: true
+    cache_ttl: 86400
+    max_text_length: 2000
+
+# ============================================================
+# LOGGING
+# ============================================================
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
+  file: "logs/rag.log"
+  max_bytes: 10485760
+  backup_count: 5
+
+# ============================================================
+# CACHE
+# ============================================================
+
+cache:
+  enabled: true
+  ttl: 3600
+  max_size: 1000
+
+# ============================================================
+# SERVER
+# ============================================================
+
+server:
+  host: "0.0.0.0"
+  port: 8002
+  debug: true
+  reload: false

@@ -4,13 +4,13 @@ services:
     name: backend-django
     runtime: python
     pythonVersion: 3.11
-    buildcommand: |
-      pip install --upgrade pip --retries 5 --timeout 60
-      cd backend_dj
+    buildCommand: |
+      pip install --upgrade pip
       pip install -r requirements.txt
-      python manage.py migrate
+      cd backend_dj
+      python manage.py migrate --noinput
       python manage.py collectstatic --noinput
-    startcommand: cd backend_dj && gunicorn betafarm_ai.wsgi:application --bind 0.0.0.0:$PORT
+    startCommand: cd backend_dj && gunicorn betafarm.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -22,17 +22,18 @@ services:
         value: false
       - key: ALLOWED_HOSTS
         value: .onrender.com
+      - key: PYTHON_VERSION
+        value: 3.11.12
 
   # RAG Service (FastAPI)
   - type: web
     name: betafarm-rag
     runtime: python
     pythonVersion: 3.11
-    buildcommand: |
-      pip install --upgrade pip --retries 5 --timeout 60
-      cd rag
-      pip install -r requirements.txt
-    startcommand: cd rag && uvicorn main:app --host 0.0.0.0 --port $PORT
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r rag/requirements.txt
+    startCommand: cd rag && uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: OPENAI_API_KEY
         sync: false
@@ -44,8 +45,10 @@ services:
     name: betafarm-fastapi
     runtime: python
     pythonVersion: 3.11
-    buildcommand: |
-      pip install --upgrade pip --retries 5 --timeout 60
-      cd inference_api
-      pip install -r requirements.txt
-    startcommand: cd inference_api && uvicorn main:app --host 0.0.0.0 --port $PORT
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r inference_api/requirements.txt
+    startCommand: cd inference_api && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.12

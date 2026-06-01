@@ -1,0 +1,41 @@
+services:
+  # Django Backend Service
+  - type: web
+    name: backend-django
+    runtime: python
+    buildcommand: |
+      cd backend_dj
+      pip install -r requirements.txt
+      python manage.py migrate
+      python manage.py collectstatic --noinput
+    startcommand: cd backend_dj && gunicorn betafarm_ai.wsgi:application
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: betafarmdb
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+      - key: ALLOWED_HOSTS
+        value: .onrender.com
+
+  # RAG Service (FastAPI)
+  - type: web
+    name: betafarm-rag
+    runtime: python
+    buildcommand: cd rag && pip install -r requirements.txt
+    startcommand: cd rag && uvicorn main:app --host 0.0.0 --port 8002
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+
+  # Disease Detection Service (FastAPI)
+  - type: web
+    name: betafarm-fastapi
+    runtime: python
+    buildcommand: cd fastapi && pip install -r requirements.txt
+    startcommand: cd fastapi && uvicorn main:app --host 0.0.0 --port 8001

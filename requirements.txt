@@ -128,3 +128,7 @@ nest-asyncio>=1.5.8
 typing-extensions>=4.11.0
 
 huggingface-hub==0.23.0
+
+dj_database_url
+
+psycopg2-binary

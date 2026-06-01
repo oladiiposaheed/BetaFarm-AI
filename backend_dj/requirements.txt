@@ -9,6 +9,7 @@ pyotp==2.9.0
 psycopg2-binary==2.9.9
 python-decouple==3.8
 dj_database_url==2.2.0
+gunicorn==21.2.0
 
 # PyTorch (CPU-only)
 --extra-index-url https://download.pytorch.org/whl/cpu

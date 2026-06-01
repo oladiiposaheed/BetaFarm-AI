@@ -18,8 +18,9 @@ africastalking==2.0.2
 # ============================================================
 # STACK 2: PyTorch + YOLO + CNN Training
 # ============================================================
-torch==2.4.0 --index-url https://download.pytorch.org/whl/cpu
-torchvision==0.20.0+cpu
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.4.0
+torchvision==0.20.0
 torchaudio==2.9.0+cpu
 ultralytics==8.2.0
 timm==0.9.12

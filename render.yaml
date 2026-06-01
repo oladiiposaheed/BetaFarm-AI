@@ -6,8 +6,8 @@ services:
     pythonVersion: 3.11
     buildCommand: |
       pip install --upgrade pip
-      pip install -r requirements.txt
-      cd backend_dj
+      pip install -r requirements.txt   
+      cd backend_dj                     
       python manage.py migrate --noinput
       python manage.py collectstatic --noinput
     startCommand: cd backend_dj && gunicorn betafarm.wsgi:application --bind 0.0.0.0:$PORT

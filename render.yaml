@@ -4,51 +4,35 @@ services:
     name: backend-django
     runtime: python
     pythonVersion: 3.11
+    rootDirectory: backend_dj # ← This tells Render to use backend_dj/ as root
     buildCommand: |
       pip install --upgrade pip
-      pip install -r requirements.txt   
-      cd backend_dj                     
+      pip install -r requirements.txt
       python manage.py migrate --noinput
       python manage.py collectstatic --noinput
-    startCommand: cd backend_dj && gunicorn betafarm.wsgi:application --bind 0.0.0.0:$PORT
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: betafarmdb
-          property: connectionString
-      - key: SECRET_KEY
-        generateValue: true
-      - key: DEBUG
-        value: false
-      - key: ALLOWED_HOSTS
-        value: .onrender.com
-      - key: PYTHON_VERSION
-        value: 3.11.12
+    startCommand: gunicorn betafarm.wsgi:application --bind 0.0.0.0:$PORT
+    # ... rest of your config
 
-  # RAG Service (FastAPI)
+  # RAG Service
   - type: web
     name: betafarm-rag
     runtime: python
     pythonVersion: 3.11
+    rootDirectory: rag # ← Uses rag/ as root
     buildCommand: |
       pip install --upgrade pip
-      pip install -r rag/requirements.txt
-    startCommand: cd rag && uvicorn main:app --host 0.0.0.0 --port $PORT
-    envVars:
-      - key: OPENAI_API_KEY
-        sync: false
-      - key: GROQ_API_KEY
-        sync: false
+      pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    # ... rest of your config
 
-  # Disease Detection Service (FastAPI)
+  # Disease Detection Service
   - type: web
     name: betafarm-fastapi
     runtime: python
     pythonVersion: 3.11
+    rootDirectory: inference_api # ← Uses inference_api/ as root
     buildCommand: |
       pip install --upgrade pip
-      pip install -r inference_api/requirements.txt
-    startCommand: cd inference_api && uvicorn main:app --host 0.0.0.0 --port $PORT
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.12
+      pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    # ... rest of your config

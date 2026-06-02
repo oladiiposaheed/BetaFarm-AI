@@ -25,8 +25,13 @@ from rest_framework_simplejwt.views import (
 from accounts.views import ProtectedTestView
 from django.conf import settings
 from django.conf.urls.static import static
+from django.shortcuts import redirect
+
+from . import views
 
 urlpatterns = [
+    path('', views.home_view, name='home'),
+    path('', lambda request: redirect('/admin/', permanent=False)),
     # Django Admin Panel (agronomist dashboard)
     path("admin/", admin.site.urls), 
     

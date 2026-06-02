@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>BetaFarm AI - Disease Detection</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f0f2f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        
+        .app-container { max-width: 450px; margin: 0 auto; background: #f0f2f5; min-height: 100vh; }
+        
+        .app-header { background: #075e54; padding: 12px 16px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; }
+        .app-header a { color: white; font-size: 20px; text-decoration: none; }
+        .app-header h1 { font-size: 18px; color: white; margin: 0; flex: 1; }
+        
+        .content { padding: 16px; padding-bottom: 80px; }
+        
+        .card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        
+        .camera-preview { width: 100%; height: 300px; background: #000; border-radius: 12px; object-fit: cover; display: none; }
+        .image-preview { width: 100%; max-height: 300px; border-radius: 12px; object-fit: contain; background: #f0f2f5; display: none; }
+        
+        .btn { padding: 12px 20px; border-radius: 30px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; width: 100%; margin-bottom: 8px; }
+        .btn-primary { background: #075e54; color: white; }
+        .btn-primary:active { transform: scale(0.97); }
+        .btn-outline { background: white; border: 1px solid #075e54; color: #075e54; }
+        .btn-warning { background: #ff9800; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        
+        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-group .btn { flex: 1; margin-bottom: 0; }
+        
+        .result-card { background: #f8f9fa; border-radius: 12px; padding: 16px; margin-top: 16px; display: none; }
+        .result-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; color: #075e54; }
+        .result-row { margin-bottom: 12px; padding: 6px 0; border-bottom: 1px solid #e0e0e0; }
+        .result-label { font-weight: 500; color: #666; display: block; margin-bottom: 4px; }
+        .result-value { font-weight: 600; color: #333; }
+        
+        /* Fixed: Allow treatment text to wrap and scroll */
+        .treatment-text {
+            background: #f0f2f5;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #333;
+            white-space: normal;
+            word-wrap: break-word;
+            max-height: 250px;
+            overflow-y: auto;
+            margin-top: 8px;
+        }
+        
+        .confidence-bar { height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; margin: 8px 0; }
+        .confidence-fill { height: 100%; background: #075e54; width: 0%; transition: width 0.3s; }
+        
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 450px; margin: 0 auto; background: white; display: flex; justify-content: space-around; padding: 8px 12px; border-top: 0.5px solid #e2e8e2; z-index: 100; }
+        .nav-item { text-align: center; padding: 4px 0; color: #667781; text-decoration: none; font-size: 10px; flex: 1; }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 2px; }
+        .nav-item.active { color: #25d366; }
+        
+        .spinner { display: none; text-align: center; padding: 20px; }
+        .toast-container { z-index: 1100; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="app-header">
+            <a href="dashboard.html"><i class="fas fa-arrow-left"></i></a>
+            <h1><i class="fas fa-camera me-2"></i> Disease Detection</h1>
+            <div style="width: 24px;"></div>
+        </div>
+
+        <div class="content">
+            <div class="card">
+                <div id="cameraSection">
+                    <video id="cameraPreview" class="camera-preview" autoplay playsinline></video>
+                    <img id="imagePreview" class="image-preview">
+                    <canvas id="photoCanvas" style="display: none;"></canvas>
+                    
+                    <div class="btn-group mb-3">
+                        <button id="startCameraBtn" class="btn btn-primary"><i class="fas fa-video me-2"></i> Camera</button>
+                        <button id="captureBtn" class="btn btn-outline" style="display: none;"><i class="fas fa-camera me-2"></i> Capture</button>
+                        <label class="btn btn-outline" style="margin-bottom: 0; cursor: pointer;"><i class="fas fa-upload me-2"></i> Upload<input type="file" id="galleryInput" accept="image/*" style="display: none;"></label>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button id="detectBtn" class="btn btn-warning" style="display: none;"><i class="fas fa-microscope me-2"></i> Detect Disease</button>
+                        <button id="resetBtn" class="btn btn-secondary" style="display: none;"><i class="fas fa-redo me-2"></i> Reset</button>
+                    </div>
+                </div>
+
+                <div id="spinner" class="spinner">
+                    <div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading...</span></div>
+                    <p class="mt-2 text-muted">Analyzing image...</p>
+                </div>
+
+                <div id="resultSection" class="result-card">
+                    <div class="result-title"><i class="fas fa-clipboard-list me-2"></i>Detection Results</div>
+                    
+                    <div class="result-row">
+                        <span class="result-label">Disease</span>
+                        <span class="result-value" id="diseaseName">-</span>
+                    </div>
+                    
+                    <div class="result-row">
+                        <span class="result-label">Confidence</span>
+                        <span class="result-value" id="confidenceText">0%</span>
+                        <div class="confidence-bar"><div class="confidence-fill" id="confidenceBar"></div></div>
+                    </div>
+                    
+                    <div class="result-row">
+                        <span class="result-label">Health Status</span>
+                        <span class="result-value" id="healthStatus">-</span>
+                    </div>
+                    
+                    <div class="result-row">
+                        <span class="result-label">Treatment</span>
+                        <div id="solution" class="treatment-text">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="chat.html" class="nav-item"><i class="fas fa-comment-dots"></i><span>Chat</span></a>
+            <a href="disease.html" class="nav-item active"><i class="fas fa-camera"></i><span>Detect</span></a>
+            <a href="history.html" class="nav-item"><i class="fas fa-history"></i><span>History</span></a>
+            <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="liveToast" class="toast" data-bs-autohide="true" data-bs-delay="3000">
+            <div class="toast-header"><i class="fas fa-info-circle me-2"></i><strong>BetaFarm AI</strong><button type="button" class="btn-close" data-bs-dismiss="toast"></button></div>
+            <div class="toast-body" id="toastMessage"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        const token = localStorage.getItem('access_token');
+        
+        if (!token) window.location.href = 'index.html';
+        
+        // DOM Elements
+        const video = document.getElementById('cameraPreview');
+        const canvas = document.getElementById('photoCanvas');
+        const imagePreview = document.getElementById('imagePreview');
+        const startCameraBtn = document.getElementById('startCameraBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const detectBtn = document.getElementById('detectBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const galleryInput = document.getElementById('galleryInput');
+        const spinner = document.getElementById('spinner');
+        const resultSection = document.getElementById('resultSection');
+        const diseaseNameSpan = document.getElementById('diseaseName');
+        const confidenceTextSpan = document.getElementById('confidenceText');
+        const confidenceBar = document.getElementById('confidenceBar');
+        const healthStatusSpan = document.getElementById('healthStatus');
+        const solutionDiv = document.getElementById('solution');
+        
+        let currentImageFile = null;
+        let mediaStream = null;
+        
+        function showToast(msg, type) {
+            const toastBody = document.getElementById('toastMessage');
+            if (!toastBody) return;
+            toastBody.innerHTML = (type === 'success' ? '✅ ' : '❌ ') + msg;
+            const toast = new bootstrap.Toast(document.getElementById('liveToast'), { delay: 3000 });
+            toast.show();
+        }
+        
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                mediaStream = stream;
+                video.srcObject = stream;
+                video.style.display = 'block';
+                imagePreview.style.display = 'none';
+                startCameraBtn.style.display = 'none';
+                captureBtn.style.display = 'block';
+                detectBtn.style.display = 'none';
+                resetBtn.style.display = 'none';
+                resultSection.style.display = 'none';
+            } catch (error) {
+                showToast('Camera access denied. Use Upload instead.', 'error');
+            }
+        }
+        
+        function capturePhoto() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageUrl = canvas.toDataURL('image/jpeg', 0.9);
+            imagePreview.src = imageUrl;
+            imagePreview.style.display = 'block';
+            video.style.display = 'none';
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+            fetch(imageUrl).then(res => res.blob()).then(blob => {
+                currentImageFile = new File([blob], 'leaf.jpg', { type: 'image/jpeg' });
+            });
+            captureBtn.style.display = 'none';
+            detectBtn.style.display = 'block';
+            resetBtn.style.display = 'block';
+            showToast('Photo captured! Click Detect.', 'success');
+        }
+        
+        function handleGalleryUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                showToast('Please select an image file', 'error');
+                return;
+            }
+            currentImageFile = file;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                video.style.display = 'none';
+                if (mediaStream) {
+                    mediaStream.getTracks().forEach(track => track.stop());
+                    mediaStream = null;
+                }
+                startCameraBtn.style.display = 'block';
+                captureBtn.style.display = 'none';
+                detectBtn.style.display = 'block';
+                resetBtn.style.display = 'block';
+                resultSection.style.display = 'none';
+                showToast('Image loaded! Click Detect.', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function reset() {
+            resultSection.style.display = 'none';
+            imagePreview.style.display = 'none';
+            imagePreview.src = '';
+            currentImageFile = null;
+            detectBtn.style.display = 'none';
+            resetBtn.style.display = 'none';
+            startCameraBtn.style.display = 'block';
+            captureBtn.style.display = 'none';
+            if (galleryInput) galleryInput.value = '';
+            if (mediaStream) video.style.display = 'block';
+            else video.style.display = 'none';
+        }
+        
+        async function detectDisease() {
+            if (!currentImageFile) {
+                showToast('Please take or upload a photo first', 'warning');
+                return;
+            }
+            
+            spinner.style.display = 'block';
+            resultSection.style.display = 'none';
+            
+            const formData = new FormData();
+            formData.append('image', currentImageFile);
+            
+            try {
+                const response = await fetch(`${API_BASE}/predict/`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    diseaseNameSpan.textContent = result.disease_name || 'Unknown';
+                    const percent = (result.confidence || 0);
+                    confidenceTextSpan.textContent = `${percent}%`;
+                    confidenceBar.style.width = `${percent}%`;
+                    healthStatusSpan.textContent = result.health_status || 'Unknown';
+                    // Display full treatment text (no truncation)
+                    solutionDiv.textContent = result.solution || 'No treatment information available.';
+                    resultSection.style.display = 'block';
+                    showToast('Detection complete!', 'success');
+                } else {
+                    showToast(result.error || 'Detection failed', 'error');
+                }
+            } catch (error) {
+                console.error('Detection error:', error);
+                showToast('Network error. Please try again.', 'error');
+            } finally {
+                spinner.style.display = 'none';
+            }
+        }
+        
+        startCameraBtn.addEventListener('click', startCamera);
+        captureBtn.addEventListener('click', capturePhoto);
+        detectBtn.addEventListener('click', detectDisease);
+        resetBtn.addEventListener('click', reset);
+        galleryInput.addEventListener('change', handleGalleryUpload);
+    </script>
+</body>
+</html>

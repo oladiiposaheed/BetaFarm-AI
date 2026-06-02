@@ -1,4 +1,6 @@
 from django.http import JsonResponse
+from django.shortcuts import render
+
 
 def home_view(request):
     return JsonResponse({
@@ -9,3 +11,8 @@ def home_view(request):
             "api": "/api/",
         }
     })
+    
+    
+def index_view(request):
+    '''Serve the main frontend page.'''
+    return render(request, 'index.html')

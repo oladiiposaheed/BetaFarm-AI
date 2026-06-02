@@ -31,6 +31,7 @@ from . import views
 
 urlpatterns = [
     path('', views.home_view, name='home'),
+    path('', views.index_view, name='index'),  # Serve the main frontend page at the root URL
     path('', lambda request: redirect('/admin/', permanent=False)),
     # Django Admin Panel (agronomist dashboard)
     path("admin/", admin.site.urls), 

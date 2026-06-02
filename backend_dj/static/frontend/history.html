@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>BetaFarm AI - History</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="app-header">
+            <a href="dashboard.html"><i class="fas fa-arrow-left"></i></a>
+            <h1>History</h1>
+            <div style="width: 24px;"></div>
+        </div>
+        <div class="messages-container">
+            <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                <button id="tabChats" class="btn-primary" style="background: #075e54; padding: 8px; font-size: 13px;">💬 Chats</button>
+                <button id="tabPreds" class="btn-outline" style="padding: 8px; font-size: 13px;">🔬 Detections</button>
+            </div>
+            <div id="chatsSection">
+                <div id="chatsList"></div>
+                <div id="chatsEmpty" style="display:none; text-align:center; padding: 40px; color:#667781;"><i class="fas fa-comment-dots fa-3x mb-2"></i><p>No chat history</p></div>
+            </div>
+            <div id="predsSection" style="display:none;">
+                <div id="predsList"></div>
+                <div id="predsEmpty" style="display:none; text-align:center; padding: 40px; color:#667781;"><i class="fas fa-microscope fa-3x mb-2"></i><p>No disease detections</p></div>
+            </div>
+        </div>
+        <div class="bottom-nav">
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+            <a href="chat.html" class="nav-item"><i class="fas fa-comment-dots"></i><span>Chat</span></a>
+            <a href="disease.html" class="nav-item"><i class="fas fa-camera"></i><span>Detect</span></a>
+            <a href="history.html" class="nav-item active"><i class="fas fa-history"></i><span>History</span></a>
+            <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+        </div>
+    </div>
+    <script>
+        const API = 'http://localhost:8000/api';
+        const token = localStorage.getItem('access_token');
+        if (!token) window.location.href = 'index.html';
+        function formatDate(d) { return new Date(d).toLocaleString(); }
+        function escape(t) { if(!t) return ''; return t.replace(/[&<>]/g, function(m){return m==='&'?'&amp;':m==='<'?'&lt;':'&gt;';}); }
+        async function loadChats() {
+            document.getElementById('chatsList').innerHTML = '';
+            try {
+                const res = await fetch(`${API}/chat/history/`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                const results = data.results || [];
+                if (results.length === 0) { document.getElementById('chatsEmpty').style.display = 'block'; return; }
+                document.getElementById('chatsEmpty').style.display = 'none';
+                results.forEach(c => {
+                    const div = document.createElement('div');
+                    div.className = 'modern-card';
+                    div.style.marginBottom = '8px';
+                    div.innerHTML = `<div style="font-weight:500; margin-bottom:4px;"><i class="fas fa-question-circle" style="color:#075e54;"></i> ${escape(c.question.substring(0,80))}</div><div style="color:#667781; font-size:12px;">${escape(c.answer.substring(0,100))}...</div><div style="color:#aaa; font-size:10px; margin-top:6px;">${formatDate(c.created_at)}</div>`;
+                    document.getElementById('chatsList').appendChild(div);
+                });
+            } catch(e) { document.getElementById('chatsEmpty').style.display = 'block'; }
+        }
+        async function loadPreds() {
+            document.getElementById('predsList').innerHTML = '';
+            try {
+                const res = await fetch(`${API}/history/`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                const results = data.results || [];
+                if (results.length === 0) { document.getElementById('predsEmpty').style.display = 'block'; return; }
+                document.getElementById('predsEmpty').style.display = 'none';
+                results.forEach(p => {
+                    const div = document.createElement('div');
+                    div.className = 'modern-card';
+                    div.style.marginBottom = '8px';
+                    div.innerHTML = `<div style="font-weight:500; margin-bottom:4px;"><i class="fas fa-leaf" style="color:#075e54;"></i> ${escape(p.disease_name || 'Unknown')} <span class="badge ${p.health_status==='Healthy'?'bg-success':'bg-warning'}">${p.health_status || 'Unknown'}</span></div><div style="color:#667781; font-size:12px;">Confidence: ${p.confidence || 0}%</div><div style="color:#aaa; font-size:10px; margin-top:6px;">${formatDate(p.created_at)}</div>`;
+                    document.getElementById('predsList').appendChild(div);
+                });
+            } catch(e) { document.getElementById('predsEmpty').style.display = 'block'; }
+        }
+        document.getElementById('tabChats').onclick = () => { document.getElementById('chatsSection').style.display='block'; document.getElementById('predsSection').style.display='none'; document.getElementById('tabChats').style.background='#075e54'; document.getElementById('tabChats').style.color='white'; document.getElementById('tabPreds').style.background='white'; document.getElementById('tabPreds').style.color='#075e54'; document.getElementById('tabPreds').style.border='1px solid #075e54'; loadChats(); };
+        document.getElementById('tabPreds').onclick = () => { document.getElementById('chatsSection').style.display='none'; document.getElementById('predsSection').style.display='block'; document.getElementById('tabPreds').style.background='#075e54'; document.getElementById('tabPreds').style.color='white'; document.getElementById('tabChats').style.background='white'; document.getElementById('tabChats').style.color='#075e54'; document.getElementById('tabChats').style.border='1px solid #075e54'; loadPreds(); };
+        loadChats();
+    </script>
+</body>
+</html>

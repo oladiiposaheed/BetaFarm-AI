@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BetaFarm AI - Login</title>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        .container { max-width: 500px; margin: 0 auto; padding: 20px; }
+        .card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); margin-top: 50px; }
+        .logo-circle { width: 70px; height: 70px; background: linear-gradient(135deg, #2E7D32, #4CAF50); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+        .logo-circle i { font-size: 35px; color: white; }
+        h1 { text-align: center; color: #2E7D32; }
+        p { text-align: center; color: #666; margin-bottom: 30px; }
+        input { width: 100%; padding: 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; margin-bottom: 15px; }
+        button { width: 100%; padding: 15px; background: #2E7D32; color: white; border: none; border-radius: 10px; font-size: 16px; cursor: pointer; }
+        button:hover { background: #1B5E20; }
+        .error { color: red; text-align: center; margin-top: 10px; }
+        .success { color: green; text-align: center; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="logo-circle">
+                <i>🌿</i>
+            </div>
+            <h1>BetaFarm AI</h1>
+            <p>Your Agricultural Knowledge Assistant</p>
+            
+            <input type="tel" id="phoneNumber" placeholder="8012345678" maxlength="10">
+            <button id="sendOtpBtn">Send OTP</button>
+            
+            <div id="message"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000/api';
+        
+        async function sendOTP() {
+            let phone = document.getElementById('phoneNumber').value.trim();
+            const messageDiv = document.getElementById('message');
+            
+            if (!phone) {
+                messageDiv.innerHTML = '<div class="error">Please enter phone number</div>';
+                return;
+            }
+            
+            if (phone.length === 10) {
+                phone = '234' + phone;
+            }
+            
+            messageDiv.innerHTML = '<div class="success">Sending OTP...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/send-otp/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone_number: phone })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('userPhone', phone);
+                    messageDiv.innerHTML = '<div class="success">OTP sent! Check Django terminal</div>';
+                    alert('OTP sent! Look at your Django terminal for the code.\nThen go to otp.html');
+                } else {
+                    messageDiv.innerHTML = `<div class="error">${data.error || 'Failed to send OTP'}</div>`;
+                }
+            } catch (error) {
+                messageDiv.innerHTML = `<div class="error">Cannot connect to Django. Is it running?<br>Error: ${error.message}</div>`;
+            }
+        }
+        
+        document.getElementById('sendOtpBtn').addEventListener('click', sendOTP);
+        document.getElementById('phoneNumber').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendOTP();
+        });
+    </script>
+</body>
+</html>

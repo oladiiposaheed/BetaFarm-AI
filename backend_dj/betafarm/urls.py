@@ -25,12 +25,14 @@ from rest_framework_simplejwt.views import (
 from accounts.views import ProtectedTestView
 from django.conf import settings
 from django.conf.urls.static import static
-from django.shortcuts import redirect
 
-from . import views
+from django.http import HttpResponse
+
+def home(request):
+    return HttpResponse("BetaFarm AI API is running!")
 
 urlpatterns = [
-    path('', views.index_view, name='home'),  # Serve the main frontend page at the root URL
+     path('', home, name='home'),
     # Django Admin Panel (agronomist dashboard)
     path("admin/", admin.site.urls), 
     

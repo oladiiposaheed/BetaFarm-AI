@@ -1,20 +1,6 @@
-from django.http import JsonResponse
-from django.shortcuts import render
-
-
-def home_view(request):
-    """API root - returns JSON info"""
-    return JsonResponse({
-        "service": "BetaFarm AI API",
-        "status": "running",
-        "endpoints": {
-            "admin": "/admin/",
-            "api": "/api/",
-            "chat": "/api/chat/",
-        }
-    })
-
-
-def index_view(request):
-    """Serve the main frontend page."""
-    return render(request, 'index.html')
+def home(request):
+    import traceback
+    try:
+        return HttpResponse("BetaFarm AI API is running!")
+    except Exception as e:
+        return HttpResponse(f"Error: {str(e)}\n{traceback.format_exc()}", status=500)

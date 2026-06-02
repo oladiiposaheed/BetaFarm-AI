@@ -30,9 +30,7 @@ from django.shortcuts import redirect
 from . import views
 
 urlpatterns = [
-    path('', views.home_view, name='home'),
-    path('', views.index_view, name='index'),  # Serve the main frontend page at the root URL
-    path('', lambda request: redirect('/admin/', permanent=False)),
+    path('', views.index_view, name='home'),  # Serve the main frontend page at the root URL
     # Django Admin Panel (agronomist dashboard)
     path("admin/", admin.site.urls), 
     

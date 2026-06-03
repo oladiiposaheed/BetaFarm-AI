@@ -220,16 +220,15 @@
         </div>
     </div>
     
-    <script src="/js/auth.js"></script>
     <script>
-        // Set user name
-        const userName = localStorage.getItem('userName') || 'Farmer';
-        document.getElementById('userName').textContent = userName;
-        
         // Check authentication
         if (!localStorage.getItem('access_token')) {
             window.location.href = '/';
         }
+        
+        // Set user name
+        const userName = localStorage.getItem('userName') || 'Farmer';
+        document.getElementById('userName').textContent = userName;
     </script>
 </body>
 </html>

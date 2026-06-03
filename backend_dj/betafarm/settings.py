@@ -160,8 +160,10 @@ STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # For production static files
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-    BASE_DIR.parent / 'frontend' 
+    BASE_DIR / 'static',
+    BASE_DIR.parent / 'frontend',
+    BASE_DIR.parent / 'frontend/css',
+    BASE_DIR.parent / 'frontend/js', 
 ] # For development static files 
 
 # Default primary key field type

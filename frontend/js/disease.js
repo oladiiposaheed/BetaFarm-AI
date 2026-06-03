@@ -1,36 +1,58 @@
-/**
- * DISEASE DETECTION - Complete Working Version
- */
+// Disease Detection JavaScript
 
-// ============================================================
-// DOM ELEMENTS
-// ============================================================
+const API_BASE_URL = '/api';
 
-const video = document.getElementById('cameraPreview');
-const canvas = document.getElementById('photoCanvas');
-const imagePreview = document.getElementById('imagePreview');
-const startCameraBtn = document.getElementById('startCameraBtn');
-const captureBtn = document.getElementById('captureBtn');
-const detectBtn = document.getElementById('detectBtn');
-const resetBtn = document.getElementById('resetBtn');
-const galleryInput = document.getElementById('galleryInput');
+// DOM Elements
+let video, canvas, imagePreview, startCameraBtn, captureBtn, detectBtn, resetBtn, galleryInput;
+let resultsSection, diseaseNameSpan, confidenceBar, confidenceText, healthStatusSpan, solutionDiv, loadingSpinner;
 
-// Results elements
-const diseaseName = document.getElementById('diseaseName');
-const confidenceBar = document.getElementById('confidenceBar');
-const confidenceText = document.getElementById('confidencText'); // Keep as is or change to confidenceText
-const healthStatus = document.getElementById('healthStatus');
-const solution = document.getElementById('solution');
-const resultsSection = document.getElementById('resultsSection');
-const loadingSpinner = document.getElementById('loadingSpinner');
-
-// Variables
 let capturedPhoto = null;
 let mediaStream = null;
 
-// ============================================================
-// FUNCTION 1: START CAMERA
-// ============================================================
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    // Get elements
+    video = document.getElementById('cameraPreview');
+    canvas = document.getElementById('photoCanvas');
+    imagePreview = document.getElementById('imagePreview');
+    startCameraBtn = document.getElementById('startCameraBtn');
+    captureBtn = document.getElementById('captureBtn');
+    detectBtn = document.getElementById('detectBtn');
+    resetBtn = document.getElementById('resetBtn');
+    galleryInput = document.getElementById('galleryInput');
+    resultsSection = document.getElementById('resultSection');
+    diseaseNameSpan = document.getElementById('diseaseName');
+    confidenceBar = document.getElementById('confidenceBar');
+    confidenceText = document.getElementById('confidenceText');
+    healthStatusSpan = document.getElementById('healthStatus');
+    solutionDiv = document.getElementById('solution');
+    loadingSpinner = document.getElementById('spinner');
+    
+    // Add event listeners
+    if (startCameraBtn) startCameraBtn.addEventListener('click', startCamera);
+    if (captureBtn) captureBtn.addEventListener('click', capturePhoto);
+        if (detectBtn) detectBtn.addEventListener('click', detectDisease);
+    if (resetBtn) resetBtn.addEventListener('click', reset);
+    if (galleryInput) galleryInput.addEventListener('change', handleGalleryUpload);
+});
+
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+    toast.style.backgroundColor = type === 'success' ? '#075e54' : type === 'error' ? '#dc3545' : '#ff9800';
+    toast.style.color = 'white';
+    toast.style.padding = '12px 24px';
+    toast.style.borderRadius = '30px';
+    toast.style.fontSize = '14px';
+    toast.style.zIndex = '1000';
+    toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+    toast.innerHTML = (type === 'success' ? '✅ ' : type === 'error' ? '❌ ' : 'ℹ️ ') + message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
 
 async function startCamera() {
     try {
@@ -41,9 +63,13 @@ async function startCamera() {
         mediaStream = stream;
         video.srcObject = stream;
         video.style.display = 'block';
+        imagePreview.style.display = 'none';
         
         startCameraBtn.style.display = 'none';
-        captureBtn.style.display = 'inline-block';
+        captureBtn.style.display = 'block';
+        detectBtn.style.display = 'none';
+        resetBtn.style.display = 'none';
+        if (resultsSection) resultsSection.style.display = 'none';
         
         showToast('Camera started. Position the leaf and tap Capture', 'success');
     } catch (error) {
@@ -52,11 +78,9 @@ async function startCamera() {
     }
 }
 
-// ============================================================
-// FUNCTION 2: CAPTURE PHOTO
-// ============================================================
-
 function capturePhoto() {
+    if (!video || !canvas) return;
+    
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     
@@ -82,15 +106,12 @@ function capturePhoto() {
         });
     
     captureBtn.style.display = 'none';
-    detectBtn.style.display = 'inline-block';
-    resetBtn.style.display = 'inline-block';
+    detectBtn.style.display = 'block';
+    resetBtn.style.display = 'block';
+    if (resultsSection) resultsSection.style.display = 'none';
     
     showToast('Photo captured! Click Detect Disease', 'success');
 }
-
-// ============================================================
-// FUNCTION 3: GALLERY UPLOAD
-// ============================================================
 
 function handleGalleryUpload(event) {
     const file = event.target.files[0];
@@ -108,7 +129,7 @@ function handleGalleryUpload(event) {
         imagePreview.src = e.target.result;
         imagePreview.style.display = 'block';
         
-        if (video.style.display === 'block') {
+        if (video && video.style.display === 'block') {
             video.style.display = 'none';
             if (mediaStream) {
                 mediaStream.getTracks().forEach(track => track.stop());
@@ -116,43 +137,40 @@ function handleGalleryUpload(event) {
             }
         }
         
-        startCameraBtn.style.display = 'inline-block';
+        startCameraBtn.style.display = 'block';
         captureBtn.style.display = 'none';
-        detectBtn.style.display = 'inline-block';
-        resetBtn.style.display = 'inline-block';
+        detectBtn.style.display = 'block';
+        resetBtn.style.display = 'block';
+        if (resultsSection) resultsSection.style.display = 'none';
         
         showToast('Image loaded! Click Detect Disease', 'success');
     };
     reader.readAsDataURL(file);
 }
 
-// ============================================================
-// FUNCTION 4: RESET
-// ============================================================
-
 function reset() {
-    resultsSection.style.display = 'none';
-    imagePreview.style.display = 'none';
-    imagePreview.src = '';
+    if (resultsSection) resultsSection.style.display = 'none';
+    if (imagePreview) {
+        imagePreview.style.display = 'none';
+        imagePreview.src = '';
+    }
     capturedPhoto = null;
     
-    detectBtn.style.display = 'none';
-    resetBtn.style.display = 'none';
-    startCameraBtn.style.display = 'inline-block';
-    captureBtn.style.display = 'none';
+    if (detectBtn) detectBtn.style.display = 'none';
+    if (resetBtn) resetBtn.style.display = 'none';
+    if (startCameraBtn) startCameraBtn.style.display = 'block';
+    if (captureBtn) captureBtn.style.display = 'none';
     
     if (galleryInput) galleryInput.value = '';
     
-    if (mediaStream) {
+    if (mediaStream && video) {
         video.style.display = 'block';
-    } else {
+    } else if (video) {
         video.style.display = 'none';
     }
+    
+    showToast('Reset complete. Take a new photo or upload.', 'info');
 }
-
-// ============================================================
-// FUNCTION 5: DETECT DISEASE
-// ============================================================
 
 async function detectDisease() {
     if (!capturedPhoto) {
@@ -160,8 +178,8 @@ async function detectDisease() {
         return;
     }
     
-    loadingSpinner.style.display = 'block';
-    resultsSection.style.display = 'none';
+    if (loadingSpinner) loadingSpinner.style.display = 'block';
+    if (resultsSection) resultsSection.style.display = 'none';
     
     const formData = new FormData();
     formData.append('image', capturedPhoto);
@@ -170,12 +188,12 @@ async function detectDisease() {
     
     if (!token) {
         showToast('Please login again', 'error');
-        window.location.href = 'index.html';
+        window.location.href = '/';
         return;
     }
     
     try {
-        const response = await fetch('http://localhost:8000/api/predict/', {
+        const response = await fetch(`${API_BASE_URL}/predict/`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -186,61 +204,37 @@ async function detectDisease() {
         const result = await response.json();
         
         if (response.ok) {
-            // Display results
-            diseaseName.textContent = result.disease_name || 'Unknown';
-            const confidencePercent = (result.confidence || 0) * 100;
-            confidenceBar.style.width = `${confidencePercent}%`;
-            confidenceText.textContent = `${confidencePercent.toFixed(1)}%`;
-            healthStatus.textContent = result.health_status || 'Unknown';
-            solution.textContent = result.solution || 'No treatment information available.';
+            if (diseaseNameSpan) diseaseNameSpan.textContent = result.disease_name || 'Unknown';
+            const confidencePercent = (result.confidence || 0);
+            if (confidenceBar) confidenceBar.style.width = `${confidencePercent}%`;
+            if (confidenceText) confidenceText.textContent = `${confidencePercent}%`;
+            if (healthStatusSpan) healthStatusSpan.textContent = result.health_status || 'Unknown';
             
-            resultsSection.style.display = 'block';
+            // Display full treatment text
+            if (solutionDiv) {
+                solutionDiv.textContent = result.solution || 'No treatment information available.';
+                solutionDiv.style.whiteSpace = 'normal';
+                solutionDiv.style.wordWrap = 'break-word';
+                solutionDiv.style.maxHeight = '250px';
+                solutionDiv.style.overflowY = 'auto';
+            }
+            
+            if (resultsSection) resultsSection.style.display = 'block';
             showToast('Detection complete!', 'success');
         } else {
-            showToast(result.error || 'Detection failed', 'error');
+            showToast(result.error || result.detail || 'Detection failed', 'error');
         }
     } catch (error) {
         console.error('Detection error:', error);
         showToast('Network error. Please try again.', 'error');
     } finally {
-        loadingSpinner.style.display = 'none';
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
     }
 }
 
-// ============================================================
-// HELPER: Show Toast
-// ============================================================
-
-function showToast(message, type = 'info') {
-    const toastEl = document.getElementById('liveToast');
-    const toastBody = document.getElementById('toastMessage');
-    if (!toastEl || !toastBody) return;
-    
-    let icon = '<i class="fas fa-info-circle me-2"></i>';
-    if (type === 'success') icon = '<i class="fas fa-check-circle text-success me-2"></i>';
-    if (type === 'error') icon = '<i class="fas fa-exclamation-circle text-danger me-2"></i>';
-    
-    toastBody.innerHTML = icon + message;
-    const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
-    toast.show();
-}
-
-// ============================================================
-// EVENT LISTENERS
-// ============================================================
-
-if (startCameraBtn) startCameraBtn.addEventListener('click', startCamera);
-if (captureBtn) captureBtn.addEventListener('click', capturePhoto);
-if (detectBtn) detectBtn.addEventListener('click', detectDisease);
-if (resetBtn) resetBtn.addEventListener('click', reset);
-if (galleryInput) galleryInput.addEventListener('change', handleGalleryUpload);
-
-// ============================================================
-// CHECK LOGIN
-// ============================================================
-
+// Check authentication
 if (!localStorage.getItem('access_token')) {
-    window.location.href = 'index.html';
+    window.location.href = '/';
 }
 
 // Set user name
@@ -254,6 +248,6 @@ const logoutBtn = document.getElementById('logoutBtn');
 if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
         localStorage.clear();
-        window.location.href = 'index.html';
+        window.location.href = '/';
     });
 }

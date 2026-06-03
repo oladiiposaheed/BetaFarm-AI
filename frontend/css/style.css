@@ -1,4 +1,4 @@
-/* BetaFarm AI - WhatsApp Style CSS with Round Buttons */
+/* BetaFarm AI - Beautiful WhatsApp Style CSS */
 * {
     margin: 0;
     padding: 0;
@@ -34,11 +34,13 @@ body {
     top: 0;
     z-index: 100;
 }
+
 .app-header a {
     color: white;
     font-size: 20px;
     text-decoration: none;
 }
+
 .app-header h1 {
     font-size: 18px;
     color: white;
@@ -46,10 +48,12 @@ body {
     flex: 1;
     font-weight: 500;
 }
+
 .app-header .status {
     font-size: 11px;
     opacity: 0.8;
 }
+
 .clear-chat {
     background: none;
     border: none;
@@ -75,6 +79,7 @@ body {
     justify-content: flex-end;
     margin-bottom: 4px;
 }
+
 .message-farmer .bubble {
     background: #dcf8c5;
     color: #111;
@@ -91,6 +96,7 @@ body {
     gap: 8px;
     margin-bottom: 4px;
 }
+
 .message-ai .avatar {
     width: 36px;
     height: 36px;
@@ -101,10 +107,12 @@ body {
     justify-content: center;
     flex-shrink: 0;
 }
+
 .message-ai .avatar i {
     color: white;
     font-size: 18px;
 }
+
 .message-ai .bubble {
     background: white;
     color: #111;
@@ -116,7 +124,7 @@ body {
     box-shadow: 0 1px 0.5px rgba(0,0,0,0.05);
 }
 
-/* Message Info (Time + Status) */
+/* Message Info */
 .message-info {
     display: flex;
     align-items: center;
@@ -125,9 +133,6 @@ body {
     margin-top: 4px;
     font-size: 10px;
     color: #667781;
-}
-.message-info i {
-    font-size: 10px;
 }
 
 /* Source Badge */
@@ -139,12 +144,10 @@ body {
     font-size: 10px;
     color: #54656f;
 }
+
 .source-badge i {
     color: #25d366;
     margin-right: 4px;
-}
-.source-badge strong {
-    color: #111;
 }
 
 /* Typing Indicator */
@@ -157,10 +160,12 @@ body {
     border-radius: 18px;
     width: fit-content;
 }
+
 .typing-dots {
     display: flex;
     gap: 4px;
 }
+
 .typing-dots span {
     width: 8px;
     height: 8px;
@@ -168,9 +173,11 @@ body {
     border-radius: 50%;
     animation: typing 1.4s infinite;
 }
+
 .typing-dots span:nth-child(1) { animation-delay: 0s; }
 .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
 .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
 @keyframes typing {
     0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
     30% { transform: translateY(-6px); opacity: 1; }
@@ -184,6 +191,7 @@ body {
     gap: 8px;
     align-items: center;
 }
+
 .input-area input {
     flex: 1;
     border: none;
@@ -193,9 +201,7 @@ body {
     font-size: 14px;
     outline: none;
 }
-.input-area input:focus {
-    outline: none;
-}
+
 .input-area button {
     width: 42px;
     height: 42px;
@@ -207,12 +213,9 @@ body {
     cursor: pointer;
     transition: transform 0.1s;
 }
+
 .input-area button:active {
     transform: scale(0.95);
-}
-.input-area button:disabled {
-    background: #99e6b3;
-    cursor: not-allowed;
 }
 
 /* Bottom Navigation */
@@ -223,6 +226,7 @@ body {
     padding: 8px 12px;
     border-top: 0.5px solid #e2e8e2;
 }
+
 .nav-item {
     text-align: center;
     padding: 4px 0;
@@ -231,21 +235,24 @@ body {
     font-size: 10px;
     flex: 1;
 }
+
 .nav-item i {
     font-size: 20px;
     display: block;
     margin-bottom: 2px;
 }
+
 .nav-item.active {
     color: #25d366;
 }
 
-/* Suggestions - Round Chips */
+/* Suggestions */
 .suggestions {
     padding: 8px 12px;
     background: #f0f2f5;
     border-top: 0.5px solid #e2e8e2;
 }
+
 .suggestion-chip {
     display: inline-block;
     background: white;
@@ -257,35 +264,13 @@ body {
     cursor: pointer;
     transition: all 0.1s;
 }
+
 .suggestion-chip:hover {
     background: #e8f5e9;
     border-color: #25d366;
 }
 
-/* Rich Content */
-.rich-content {
-    line-height: 1.45;
-}
-.rich-content strong {
-    color: #075e54;
-}
-.rich-content p {
-    margin: 4px 0;
-}
-
-/* Scrollbar */
-.messages-container::-webkit-scrollbar {
-    width: 6px;
-}
-.messages-container::-webkit-scrollbar-track {
-    background: transparent;
-}
-.messages-container::-webkit-scrollbar-thumb {
-    background: #c1c9ce;
-    border-radius: 3px;
-}
-
-/* Cards for other pages */
+/* Cards */
 .modern-card {
     background: white;
     border-radius: 16px;
@@ -293,6 +278,7 @@ body {
     margin-bottom: 12px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
+
 .logo-circle {
     width: 60px;
     height: 60px;
@@ -303,6 +289,7 @@ body {
     justify-content: center;
     margin: 0 auto 12px;
 }
+
 .logo-circle i {
     font-size: 28px;
     color: white;
@@ -315,6 +302,7 @@ body {
     justify-content: center;
     margin: 20px 0;
 }
+
 .otp-box {
     width: 48px;
     height: 56px;
@@ -325,58 +313,86 @@ body {
     border-radius: 12px;
     background: white;
 }
+
 .otp-box:focus {
     border-color: #075e54;
     outline: none;
 }
 
 /* Buttons */
-.btn {
-    padding: 10px 16px;
-    border-radius: 30px;
-    font-size: 14px;
-    font-weight: 500;
-    text-align: center;
-    cursor: pointer;
-    border: none;
-}
 .btn-primary {
     background: #075e54;
     color: white;
     width: 100%;
     border-radius: 30px;
+    padding: 12px;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
 }
+
 .btn-outline {
     background: white;
     border: 1px solid #075e54;
     color: #075e54;
     width: 100%;
     border-radius: 30px;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
 }
+
 .btn-danger {
     background: #dc3545;
     color: white;
     border-radius: 30px;
+    padding: 12px;
+    border: none;
+    cursor: pointer;
 }
 
-/* Stats */
+/* Toast Notifications */
+.toast-container {
+    z-index: 1100;
+}
+
+/* Scrollbar */
+.messages-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.messages-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.messages-container::-webkit-scrollbar-thumb {
+    background: #c1c9ce;
+    border-radius: 3px;
+}
+
+/* Stats Grid */
 .stats-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
     margin-bottom: 20px;
 }
+
 .stat-box {
     background: white;
     border-radius: 16px;
     padding: 14px;
     text-align: center;
 }
+
 .stat-number {
     font-size: 24px;
     font-weight: 700;
     color: #075e54;
 }
+
 .stat-label {
     font-size: 11px;
     color: #667781;
@@ -390,17 +406,19 @@ body {
     color: white;
     margin-bottom: 20px;
 }
+
 .welcome-name {
     font-size: 20px;
     font-weight: 700;
 }
 
-/* Actions */
+/* Actions Grid */
 .actions-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
 }
+
 .action-card {
     background: white;
     border-radius: 14px;
@@ -409,17 +427,14 @@ body {
     text-decoration: none;
     display: block;
 }
+
 .action-icon {
     font-size: 24px;
     display: block;
     margin-bottom: 6px;
 }
+
 .action-label {
     font-size: 11px;
     color: #4a5b4a;
-}
-
-/* Toast */
-.toast-container {
-    z-index: 1100;
 }

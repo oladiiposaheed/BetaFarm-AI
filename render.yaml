@@ -1,38 +1,61 @@
 services:
-  # Django Backend Service
+  # ============================================================
+  # 1. DJANGO BACKEND SERVICE
+  # ============================================================
   - type: web
     name: backend-django
     runtime: python
     pythonVersion: 3.11
-    rootDirectory: backend_dj # ← This tells Render to use backend_dj/ as root
+    rootDirectory: backend_dj
     buildCommand: |
       pip install --upgrade pip
+      pip install whitenoise
       pip install -r requirements.txt
       python manage.py migrate --noinput
       python manage.py collectstatic --noinput
     startCommand: gunicorn betafarm.wsgi:application --bind 0.0.0.0:$PORT
-    # ... rest of your config
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: betafarm.settings
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+      - key: RAG_URL
+        value: http://betafarm-rag.onrender.com
+      - key: FASTAPI_URL
+        value: http://betafarm-fastapi.onrender.com
+      - key: DATABASE_URL
+        # Set this in Render dashboard - use PostgreSQL
+        sync: false
 
-  # RAG Service
+  # ============================================================
+  # 2. RAG SERVICE (Port 8002)
+  # ============================================================
   - type: web
     name: betafarm-rag
     runtime: python
     pythonVersion: 3.11
-    rootDirectory: rag # ← Uses rag/ as root
+    rootDirectory: rag
     buildCommand: |
       pip install --upgrade pip
       pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
-    # ... rest of your config
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
 
-  # Disease Detection Service
+  # ============================================================
+  # 3. DISEASE DETECTION SERVICE (Port 8001)
+  # ============================================================
   - type: web
     name: betafarm-fastapi
     runtime: python
     pythonVersion: 3.11
-    rootDirectory: inference_api # ← Uses inference_api/ as root
+    rootDirectory: inference_api
     buildCommand: |
       pip install --upgrade pip
       pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
-    # ... rest of your config

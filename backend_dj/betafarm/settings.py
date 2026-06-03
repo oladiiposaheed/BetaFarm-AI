@@ -31,6 +31,8 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = ['*']
 
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -67,7 +69,7 @@ ROOT_URLCONF = "betafarm.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / 'templates'],  
+        "DIRS": [BASE_DIR / 'templates', BASE_DIR.parent / 'frontend'],  # 
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -159,6 +161,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # For production static fil
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
+    BASE_DIR.parent / 'frontend' 
 ] # For development static files 
 
 # Default primary key field type

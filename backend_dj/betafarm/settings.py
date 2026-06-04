@@ -253,11 +253,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 RAG_SERVICE_URL = config('RAG_URL', default='http://localhost:8002')
 
 # RAG service timeout
-RAG_TIMEOUT = config('RAG_TIMEOUT', default=30, cast=int)
+RAG_TIMEOUT = config('RAG_TIMEOUT', default=60, cast=int)
 
 # RAG service max retries on failure
-RAG_MAX_RETRIES = 3
-
+RAG_MAX_RETRIES = config('RAG_MAX_RETRIES', default=3, cast=int)
 # FastAPI inference service URL (for disease detection from images)
 # Runs on port 8001
 FASTAPI_URL = config('FASTAPI_URL', default='http://localhost:8001')

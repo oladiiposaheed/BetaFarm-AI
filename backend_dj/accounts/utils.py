@@ -130,25 +130,32 @@ def send_otp_via_sms(phone_number):
     return True
 
 
-def verify_otp(phone_number, otp_code):
-    '''
+def verify_otp(phone_number, code):
+    """
     Verify if the provided OTP code is correct and not expired.
-    '''
+    """
+    
+    print(f"Verifying OTP for {phone_number} with code: {code}")
+    
     try:
+        # Find the OTP in database
         otp_record = OTP.objects.get(
             phone_number=phone_number,
-            otp_code=otp_code,
+            otp_code=code,
             is_used=False,
             expires_at__gt=timezone.now()
         )
         
-        # Mark this OTP as used so it cannot be reused
+        print(f"Found valid OTP record: {otp_record.otp_code}")
+        
+        # Mark this OTP as used
         otp_record.is_used = True
         otp_record.save()
         
+        print(f"OTP verified and marked as used")
         return True
-    
+        
     except OTP.DoesNotExist:
-        return False
-    
+        print(f"No valid OTP found for {phone_number} with code {code}")
+        return False    
     

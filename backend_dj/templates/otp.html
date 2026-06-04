@@ -20,11 +20,13 @@
         .otp-input{width:50px;height:60px;text-align:center;font-size:24px;font-weight:600;border:2px solid #e0e0e0;border-radius:12px;background:white;outline:none}
         .otp-input:focus{border-color:#075e54;box-shadow:0 0 0 3px rgba(7,94,84,0.1)}
         .btn-verify{width:100%;padding:14px;background:#075e54;color:white;border:none;border-radius:30px;font-size:16px;font-weight:600;cursor:pointer}
-        .btn-verify:disabled{background:#99b8b4}
+        .btn-verify:disabled{background:#99b8b4;cursor:not-allowed}
         .resend-section{text-align:center;margin-top:24px}
         .resend-text{color:#667781;font-size:13px}
         .resend-btn{background:none;border:none;color:#075e54;font-weight:600;cursor:pointer}
         .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:30px;font-size:14px;z-index:1000;color:white;text-align:center}
+        .spinner{display:inline-block;width:16px;height:16px;border:2px solid white;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite;margin-left:8px}
+        @keyframes spin{to{transform:rotate(360deg)}}
     </style>
 </head>
 <body>
@@ -51,14 +53,128 @@
         </div>
     </div>
     <script>
-        const API_BASE='/api';
-        function showToast(msg,isError){const old=document.querySelector('.toast');if(old)old.remove();const div=document.createElement('div');div.className='toast';div.style.backgroundColor=isError?'#dc3545':'#075e54';div.innerHTML=(isError?'❌ ':'✅ ')+msg;document.body.appendChild(div);setTimeout(()=>div.remove(),3000);}
-        function getOtp(){let otp='';for(let i=0;i<=5;i++)otp+=document.getElementById(`otp${i}`).value;return otp;}
-        for(let i=0;i<=4;i++){document.getElementById(`otp${i}`).addEventListener('keyup',function(){if(this.value.length===1)document.getElementById(`otp${i+1}`).focus();});}
-        let phone=new URLSearchParams(location.search).get('phone')||localStorage.getItem('userPhone');
-        if(phone){document.getElementById('displayPhone').innerText=phone;}else{window.location.href='/';}
-        document.getElementById('verifyBtn').onclick=async function(){const otp=getOtp();if(otp.length!==6){showToast('Enter 6-digit code',true);return;}const btn=this;const originalText=btn.innerText;btn.disabled=true;btn.innerText='Verifying...';try{const res=await fetch(API_BASE+'/auth/verify-otp/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone_number:phone,otp_code:otp})});const data=await res.json();if(res.ok){localStorage.setItem('access_token',data.access);localStorage.setItem('refresh_token',data.refresh);localStorage.setItem('userName',data.user?.full_name||'Farmer');localStorage.setItem('userPhone',phone);showToast('Login successful!',false);setTimeout(()=>window.location.href='/dashboard/',1000);}else{showToast(data.error||'Invalid OTP',true);}}catch(e){showToast('Network error',true);}finally{btn.disabled=false;btn.innerText=originalText;}};
-        document.getElementById('resendBtn').onclick=async function(){try{const res=await fetch(API_BASE+'/auth/send-otp/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone_number:phone})});if(res.ok){showToast('OTP resent!',false);}else{showToast('Failed to resend',true);}}catch(e){showToast('Network error',true);}};
+        const API_BASE = '/api';
+        
+        function showToast(message, isError) {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.backgroundColor = isError ? '#dc3545' : '#075e54';
+            toast.innerHTML = (isError ? '❌ ' : '✅ ') + message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        function getOtp() {
+            let otp = '';
+            for (let i = 0; i <= 5; i++) {
+                otp += document.getElementById(`otp${i}`).value;
+            }
+            return otp;
+        }
+        
+        // Auto-focus next input
+        for (let i = 0; i <= 4; i++) {
+            document.getElementById(`otp${i}`).addEventListener('keyup', function(e) {
+                if (this.value.length === 1) {
+                    document.getElementById(`otp${i+1}`).focus();
+                }
+            });
+            // Allow backspace to go to previous field
+            document.getElementById(`otp${i}`).addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && this.value.length === 0 && i > 0) {
+                    document.getElementById(`otp${i-1}`).focus();
+                }
+            });
+        }
+        
+        let phone = new URLSearchParams(location.search).get('phone') || localStorage.getItem('userPhone');
+        if (phone) {
+            document.getElementById('displayPhone').innerText = phone;
+        } else {
+            window.location.href = '/';
+        }
+        
+        async function verifyOTP() {
+            const otp = getOtp();
+            if (otp.length !== 6) {
+                showToast('Enter 6-digit code', true);
+                return;
+            }
+            
+            const btn = document.getElementById('verifyBtn');
+            const originalText = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = 'Verifying... <span class="spinner"></span>';
+            
+            try {
+                console.log('Sending verification for:', phone, otp);
+                
+                const response = await fetch(`${API_BASE}/auth/verify-otp/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        phone_number: phone, 
+                        otp_code: otp 
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('Response:', data);
+                
+                if (response.ok) {
+                    localStorage.setItem('access_token', data.access);
+                    localStorage.setItem('refresh_token', data.refresh);
+                    localStorage.setItem('userName', data.user?.full_name || 'Farmer');
+                    localStorage.setItem('userPhone', phone);
+                    showToast('Login successful!', false);
+                    setTimeout(() => {
+                        window.location.href = '/dashboard/';
+                    }, 1000);
+                } else {
+                    showToast(data.error || 'Invalid OTP code', true);
+                }
+            } catch (error) {
+                console.error('Verification error:', error);
+                showToast('Network error: ' + error.message, true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+        
+        async function resendOTP() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/send-otp/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone_number: phone })
+                });
+                
+                if (response.ok) {
+                    showToast('OTP resent successfully!', false);
+                } else {
+                    const data = await response.json();
+                    showToast(data.error || 'Failed to resend OTP', true);
+                }
+            } catch (error) {
+                showToast('Network error', true);
+            }
+        }
+        
+        document.getElementById('verifyBtn').addEventListener('click', verifyOTP);
+        document.getElementById('resendBtn').addEventListener('click', resendOTP);
+        
+        // Allow Enter key to submit
+        document.querySelectorAll('.otp-input').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    verifyOTP();
+                }
+            });
+        });
     </script>
 </body>
 </html>

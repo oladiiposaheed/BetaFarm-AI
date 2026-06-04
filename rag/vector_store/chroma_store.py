@@ -16,6 +16,17 @@ from exception.custom_exception import BetaFarmException
 # import chromadb
 # from chromadb.config import Settings
 
+
+# Add at the very top, before the class definition
+import os
+
+# Force ChromaDB to use /tmp on Render (writable)
+if os.environ.get('RENDER', False):
+    CHROMA_PERSIST_DIR = '/tmp/chroma_db'
+else:
+    CHROMA_PERSIST_DIR = './chroma_db'
+
+
 try:
     import chromadb
     from chromadb.config import Settings
@@ -78,7 +89,9 @@ class VectorDatabase:
         self.database_type = vector_db_config.get('database_type', 'chromadb')
         
         # Where to save database files
-        self.database_folder = vector_db_config.get('database_folder', './chroma_db')
+        #self.database_folder = vector_db_config.get('database_folder', './chroma_db')
+        
+        self.database_folder = CHROMA_PERSIST_DIR
         
         # Prefix for table names
         self.table_prefix = vector_db_config.get('table_prefix', 'farm_data')

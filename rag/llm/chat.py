@@ -159,7 +159,16 @@ class FarmerChat:
             session_id = str(uuid4())
         
         if not self.is_ready:
-            return {'answer': 'Chat system not available. Check API keys.', 'sources': []}
+            # Use the search results directly as answer
+            context, sources = self._search(question, top_k)
+            if context:
+                # Return first relevant chunk as answer
+                answer = f"Based on your PDF documents:\n\n{context}"
+                return {'answer': answer, 'sources': sources[:3]}
+        else:
+            return {
+                'answer': "Please add your API keys (GROQ_API_KEY or OPENAI_API_KEY) to enable AI responses. For now, your PDFs are loaded but I can't generate answers.", 'sources': []
+            }
         
         if not hybrid_search.is_ready:
             return {'answer': 'Search system not ready. Run ingest_all.py', 'sources': []}

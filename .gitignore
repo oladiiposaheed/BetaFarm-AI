@@ -35,7 +35,6 @@ logs/
 # Large data folders (NOT for GitHub)
 
 rag/retrieval/bm25_index.pkl
-chroma_db/
 logs/
 
 # Training datasets (too large for GitHub)

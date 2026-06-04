@@ -2,56 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BetaFarm AI - Verify OTP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;min-height:100vh;display:flex;align-items:center;justify-content:center}
+        .otp-container{max-width:400px;width:100%;margin:20px;background:white;border-radius:32px;box-shadow:0 4px 20px rgba(0,0,0,0.08);overflow:hidden}
+        .otp-header{background:linear-gradient(135deg,#075e54,#128c7e);padding:30px 20px;text-align:center;color:white;position:relative}
+        .back-link{position:absolute;left:20px;top:30px;color:white;font-size:20px;text-decoration:none}
+        .otp-header h1{font-size:24px;margin-bottom:8px}
+        .otp-header p{font-size:13px;opacity:0.9}
+        .otp-header strong{color:#ffd700}
+        .otp-body{padding:32px 24px}
+        .otp-inputs{display:flex;gap:12px;justify-content:center;margin-bottom:32px}
+        .otp-input{width:50px;height:60px;text-align:center;font-size:24px;font-weight:600;border:2px solid #e0e0e0;border-radius:12px;background:white;outline:none}
+        .otp-input:focus{border-color:#075e54;box-shadow:0 0 0 3px rgba(7,94,84,0.1)}
+        .btn-verify{width:100%;padding:14px;background:#075e54;color:white;border:none;border-radius:30px;font-size:16px;font-weight:600;cursor:pointer}
+        .btn-verify:disabled{background:#99b8b4}
+        .resend-section{text-align:center;margin-top:24px}
+        .resend-text{color:#667781;font-size:13px}
+        .resend-btn{background:none;border:none;color:#075e54;font-weight:600;cursor:pointer}
+        .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:30px;font-size:14px;z-index:1000;color:white;text-align:center}
+    </style>
 </head>
 <body>
-    <div class="app-container">
-        <div class="app-header">
-            <a href="index.html"><i class="fas fa-arrow-left"></i></a>
+    <div class="otp-container">
+        <div class="otp-header">
+            <a href="/" class="back-link">←</a>
             <h1>Verify Code</h1>
-            <div style="width: 24px;"></div>
+            <p>Enter 6-digit code sent to <strong id="displayPhone"></strong></p>
         </div>
-        <div class="messages-container" style="justify-content: center;">
-            <div class="text-center mb-3">
-                <p style="color: #667781;">Enter 6-digit code sent to <strong id="displayPhone" style="color: #075e54;"></strong></p>
+        <div class="otp-body">
+            <div class="otp-inputs">
+                <input type="text" class="otp-input" id="otp0" maxlength="1" autofocus>
+                <input type="text" class="otp-input" id="otp1" maxlength="1">
+                <input type="text" class="otp-input" id="otp2" maxlength="1">
+                <input type="text" class="otp-input" id="otp3" maxlength="1">
+                <input type="text" class="otp-input" id="otp4" maxlength="1">
+                <input type="text" class="otp-input" id="otp5" maxlength="1">
             </div>
-            <div class="modern-card">
-                <div class="otp-grid">
-                    <input type="text" class="otp-box" maxlength="1" id="otp0">
-                    <input type="text" class="otp-box" maxlength="1" id="otp1">
-                    <input type="text" class="otp-box" maxlength="1" id="otp2">
-                    <input type="text" class="otp-box" maxlength="1" id="otp3">
-                    <input type="text" class="otp-box" maxlength="1" id="otp4">
-                    <input type="text" class="otp-box" maxlength="1" id="otp5">
-                </div>
-                <button id="verifyOtpBtn" class="btn-primary" style="background: #075e54;"><i class="fas fa-check-circle me-2"></i> Verify & Login</button>
-                <div class="text-center mt-3"><span style="color: #667781;">Didn't receive?</span> <button id="resendOtpBtn" class="btn btn-link" style="color: #075e54;">Resend OTP</button></div>
+            <button id="verifyBtn" class="btn-verify">Verify & Login</button>
+            <div class="resend-section">
+                <span class="resend-text">Didn't receive code?</span>
+                <button id="resendBtn" class="resend-btn">Resend OTP</button>
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const API_URL = 'http://localhost:8000/api';
-        function getOtp() { let o = ''; for(let i=0;i<=5;i++) o += document.getElementById(`otp${i}`).value; return o; }
-        for(let i=0;i<=4;i++) document.getElementById(`otp${i}`).addEventListener('keyup', function(){ if(this.value.length===1) document.getElementById(`otp${i+1}`).focus(); });
-        let phone = new URLSearchParams(location.search).get('phone') || localStorage.getItem('userPhone');
-        if(phone) document.getElementById('displayPhone').innerText = phone; else location.href='index.html';
-        document.getElementById('verifyOtpBtn').onclick = async () => {
-            const otp = getOtp();
-            if(otp.length!==6){ alert('Enter 6-digit code'); return; }
-            try {
-                const res = await fetch(`${API_URL}/auth/verify-otp/`,{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ phone_number:phone, otp_code:otp })});
-                const data = await res.json();
-                if(res.ok){ localStorage.setItem('access_token',data.access); localStorage.setItem('refresh_token',data.refresh); localStorage.setItem('userName',data.user?.full_name||'Farmer'); window.location.href='dashboard.html'; }
-                else alert(data.error||'Invalid OTP');
-            } catch(e){ alert('Network error'); }
-        };
-        document.getElementById('resendOtpBtn').onclick = async () => { try{ await fetch(`${API_URL}/auth/send-otp/`,{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ phone_number:phone })}); alert('OTP resent!'); } catch(e){ alert('Failed'); } };
+        const API_BASE='/api';
+        function showToast(msg,isError){const old=document.querySelector('.toast');if(old)old.remove();const div=document.createElement('div');div.className='toast';div.style.backgroundColor=isError?'#dc3545':'#075e54';div.innerHTML=(isError?'❌ ':'✅ ')+msg;document.body.appendChild(div);setTimeout(()=>div.remove(),3000);}
+        function getOtp(){let otp='';for(let i=0;i<=5;i++)otp+=document.getElementById(`otp${i}`).value;return otp;}
+        for(let i=0;i<=4;i++){document.getElementById(`otp${i}`).addEventListener('keyup',function(){if(this.value.length===1)document.getElementById(`otp${i+1}`).focus();});}
+        let phone=new URLSearchParams(location.search).get('phone')||localStorage.getItem('userPhone');
+        if(phone){document.getElementById('displayPhone').innerText=phone;}else{window.location.href='/';}
+        document.getElementById('verifyBtn').onclick=async function(){const otp=getOtp();if(otp.length!==6){showToast('Enter 6-digit code',true);return;}const btn=this;const originalText=btn.innerText;btn.disabled=true;btn.innerText='Verifying...';try{const res=await fetch(API_BASE+'/auth/verify-otp/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone_number:phone,otp_code:otp})});const data=await res.json();if(res.ok){localStorage.setItem('access_token',data.access);localStorage.setItem('refresh_token',data.refresh);localStorage.setItem('userName',data.user?.full_name||'Farmer');localStorage.setItem('userPhone',phone);showToast('Login successful!',false);setTimeout(()=>window.location.href='/dashboard/',1000);}else{showToast(data.error||'Invalid OTP',true);}}catch(e){showToast('Network error',true);}finally{btn.disabled=false;btn.innerText=originalText;}};
+        document.getElementById('resendBtn').onclick=async function(){try{const res=await fetch(API_BASE+'/auth/send-otp/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone_number:phone})});if(res.ok){showToast('OTP resent!',false);}else{showToast('Failed to resend',true);}}catch(e){showToast('Network error',true);}};
     </script>
 </body>
 </html>

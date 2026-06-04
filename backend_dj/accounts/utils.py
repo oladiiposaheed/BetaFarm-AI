@@ -25,7 +25,7 @@ def generate_otp(phone_number):
     OTP.objects.filter(
         phone_number=phone_number,
         is_used=False,
-        expire_at__gt=timezone.now()
+        expires_at__gt=timezone.now()
     ).delete()
     
     # Generate a random 6-digit number
@@ -38,7 +38,7 @@ def generate_otp(phone_number):
     OTP.objects.create(
         phone_number=phone_number,
         otp_code=otp_code,
-        expire_at=expire_at,
+        expires_at=expire_at,
         is_used=False
     )
     
@@ -139,7 +139,7 @@ def verify_otp(phone_number, otp_code):
             phone_number=phone_number,
             otp_code=otp_code,
             is_used=False,
-            expire_at__gt=timezone.now()
+            expires_at__gt=timezone.now()
         )
         
         # Mark this OTP as used so it cannot be reused
